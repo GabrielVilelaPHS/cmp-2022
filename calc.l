@@ -2,7 +2,7 @@
 
 
 	#include <stdio.h>
-
+	#include "calc.tab.h"
 %}
 
 
@@ -15,20 +15,27 @@ L 	[a-zA-Z_]
 
 
 
-"/*" { comment();}
+ /*" { comment();}*/
 
 [ \t\r\n]	{}
-"print" 	{ printf("TOK_PRINT\n"); }
-"="		{ printf("TOK_EQUAL\n"); }
-"*"		{ printf("TOK_MULTIPLY\n"); }
-"+"		{ printf("TOK_PLUS\n"); }
-"/"		{ printf("TOK_MINUS\n"); }
-"("		{ printf("TOK_OP\n"); }
-")"		{ printf("TOK_CP\n"); }
+"print" 	{ return TOK_PRINT; }
+"="		{ return '='; }
+"*"		{ return '*'; }
+"/"		{ return '/'; }
+"+"		{ return '+'; }
+"-"		{ return '-'; }
+"("		{ return '('; }
+")"		{ return ')'; }
+"^"		{ return '^'; }
+"%"		{ return '%'; }
 
-{D}+		{ printf("TOK_INTEGER<%s>\n", yytext); }
-{D}\.{D}+ 	{ printf("TOK_FLOAT<%s>\n", yytext); }
-{L}({L}|{D})*	{ printf("TOK_LITERAL<%s>\n", yytext); }
+{D}+		{ return TOK_INTEGER; }
+{D}+\.{D}+ 	{ return TOK_FLOAT; }
+{L}({L}|{D})*	{ return TOK_IDENT; }
+\"{L}({L}|{D})*\"	{ return TOK_LITERAL; }
+
+
+ /* ("){L}({L}|{D})*(")	{ return TOK_LITERAL; }*/ 
 
 .		{ printf("Invalid caracter: %c.\n", yytext[0]); }
 
@@ -41,13 +48,15 @@ int yywrap(){
 int main(int argc, char *argv[]){ /*args passa argumentos na linha de comando*/
 	
 	if (argc <= 1){
-		printf("%s [file]\n". argv[0]);
+		printf("%s [file]\n", argv[0]);
 		return 1;
 	}
 	
 	FILE *f = fopen(argv[1],"r");
 	yyin = f; /*infoma que eu quero copilar o arqruivo que estou*/
-	yylex(); /*manda copilar*/
+	yyparse(); /*manda copilar*/
 	fclose(f);
 	
 	return 0;
+
+}
